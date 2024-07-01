@@ -3,10 +3,12 @@
 #
 
 # Add source to this project's executable.
-add_executable (JJEngine "JJEngine.cpp" "JJEngine.h")
+add_library (JJEngine  "include/JJEngine.h" "include/Graphics/Window.h" "src/Graphics/Window.cpp")
+target_include_directories(JJEngine PUBLIC include/)
 
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET JJEngine PROPERTY CXX_STANDARD 20)
-endif()
+target_link_libraries(JJEngine glfw)
+target_link_libraries(JJEngine glad)
+target_link_libraries(JJEngine glm)
+target_link_libraries(JJEngine assimp)
 
 # TODO: Add tests and install targets if needed.
