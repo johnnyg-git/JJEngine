@@ -1,14 +1,20 @@
-﻿# CMakeList.txt : CMake project for JJEngine, include source and define
-# project specific logic here.
-#
+﻿cmake_minimum_required (VERSION 3.8)
+project ("JJEngine")
 
-# Add source to this project's executable.
-add_library (JJEngine  "include/JJEngine.h" "include/Graphics/Window.h" "src/Graphics/Window.cpp")
-target_include_directories(JJEngine PUBLIC include/)
+set(CMAKE_CXX_STANDARD 20)
 
-target_link_libraries(JJEngine glfw)
-target_link_libraries(JJEngine glad)
-target_link_libraries(JJEngine glm)
-target_link_libraries(JJEngine assimp)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
-# TODO: Add tests and install targets if needed.
+add_subdirectory("thirdparty/glad")
+add_subdirectory("thirdparty/glfw")
+add_subdirectory("thirdparty/glm")
+
+add_library(${PROJECT_NAME} "src/Window.cpp")
+
+target_link_libraries(${PROJECT_NAME} glfw)
+target_link_libraries(${PROJECT_NAME} glad)
+target_link_libraries(${PROJECT_NAME} glm)
+
+target_include_directories(${PROJECT_NAME} PUBLIC "include")

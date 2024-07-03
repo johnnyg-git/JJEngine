@@ -1,9 +1,6 @@
-[submodule "thirdparty/assimp"]
-	path = thirdparty/assimp
-	url = https://github.com/assimp/assimp.git
-[submodule "thirdparty/glfw"]
-	path = thirdparty/glfw
+[submodule "JJEngine/thirdparty/glfw"]
+	path = JJEngine/thirdparty/glfw
 	url = https://github.com/glfw/glfw.git
-[submodule "thirdparty/glm"]
-	path = thirdparty/glm
+[submodule "JJEngine/thirdparty/glm"]
+	path = JJEngine/thirdparty/glm
 	url = https://github.com/g-truc/glm.git
