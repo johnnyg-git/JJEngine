@@ -11,10 +11,12 @@ add_subdirectory("thirdparty/glad")
 add_subdirectory("thirdparty/glfw")
 add_subdirectory("thirdparty/glm")
 
-add_library(${PROJECT_NAME} "src/Window.cpp" "include/JJEngine/Application.h" "src/Application.cpp")
+add_library(${PROJECT_NAME} "src/Window.cpp" "src/Application.cpp" "src/Shader.cpp")
 
 target_link_libraries(${PROJECT_NAME} glfw)
 target_link_libraries(${PROJECT_NAME} glad)
 target_link_libraries(${PROJECT_NAME} glm)
 
 target_include_directories(${PROJECT_NAME} PUBLIC "include")
+
+file (GLOB SHADERS shaders/*.frag shaders/*.vert)

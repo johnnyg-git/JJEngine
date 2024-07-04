@@ -1,36 +1,41 @@
 #include <stdexcept>
 #include <iostream>
 
-#include "glad/glad.h"
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include "JJEngine/Window.h"
 
 namespace JJEngine {
-	std::vector<Window*> Window::s_windows;
-
-	static void WindowResizeCallback(GLFWwindow* glfwWindow, int width, int height)
-	{
-		for(auto& window : Window::s_windows)
-		{
-			if(window->m_glfwWindow == glfwWindow)
-			{
-				window->m_width = width;
-				window->m_height = height;
-			}
-		}
-	}
+	Window* Window::s_instance = nullptr;
 
 	Window::Window(const char* title, int width, int height, glm::vec4 backgroundColor)
-		: m_title(title), m_width(width), m_height(height), m_backgroundColor(backgroundColor)
+		: m_title(title), m_width(width), m_height(height), m_clearColor(backgroundColor)
 	{
+		if(s_instance!=nullptr)
+		{
+			throw std::runtime_error("Only one window can be created at a time");
+			return;
+		}
+
 		if(!glfwInit())
 		{
 			throw std::runtime_error("Failed to initialize GLFW");
 			return;
 		}
 
+		glfwSetErrorCallback([](int error, const char* description)
+		{
+			std::cerr << "GLFW error: " << description << std::endl;
+		});
+
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef _DEBUG
+		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+#endif
 
 		m_glfwWindow = glfwCreateWindow(width, height, title, nullptr, nullptr);
 		if(!m_glfwWindow)
@@ -42,7 +47,22 @@ namespace JJEngine {
 		glfwMakeContextCurrent(m_glfwWindow);
 		glfwSetWindowUserPointer(m_glfwWindow, this);
 
-		glfwSetWindowSizeCallback(m_glfwWindow, WindowResizeCallback);
+		glfwSetWindowSizeCallback(m_glfwWindow, [](GLFWwindow* glfwWindow, int width, int height)
+		{
+			if(Window::s_instance->m_glfwWindow == glfwWindow)
+			{
+				Window::s_instance->m_width = width;
+				Window::s_instance->m_height = height;
+			}
+		});
+
+		glfwSetFramebufferSizeCallback(m_glfwWindow, [](GLFWwindow* glfwWindow, int width, int height)
+		{
+			if(Window::s_instance->m_glfwWindow == glfwWindow)
+			{
+				glViewport(0, 0, width, height);
+			}
+		});
 
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		glfwSwapInterval(1);
@@ -57,14 +77,19 @@ namespace JJEngine {
 
 		glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
 
-		s_windows.push_back(this);
+		s_instance = this;
 	}
 
 	Window::~Window()
 	{
+		std::cout << "Destroying window" << std::endl;
+
 		glfwDestroyWindow(m_glfwWindow);
 
 		glfwTerminate();
+
+		if(s_instance == this)
+			s_instance = nullptr;
 	}
 
 	void Window::Clear()
@@ -91,10 +116,20 @@ namespace JJEngine {
 		m_height = height;
 	}
 
-	void Window::SetBackgroundColor(glm::vec4 color)
+	void Window::SetClearColor(glm::vec4 color)
 	{
-		m_backgroundColor = color;
+		m_clearColor = color;
 		glClearColor(color.x, color.y, color.z, color.w);
-
 	}
+
+	void Window::SetClearColor(float r, float g, float b, float a)
+	{
+		SetClearColor(glm::vec4(r, g, b, a));
+	}
+
+	bool Window::ShouldClose() const
+	{
+		return glfwWindowShouldClose(m_glfwWindow);
+	}
+
 }
